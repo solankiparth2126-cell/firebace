@@ -1,30 +1,139 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /**
+     * MONEYFLOW SECURITY RULES - PROTOTYPING MODE
+     *
+     * Core Philosophy:
+     * This ruleset enforces a strict user-ownership model. Access control is primarily governed by
+     * the path-based hierarchy and verified by denormalized 'userId' fields within documents.
+     *
+     * Data Structure:
+     * - /users/{userId}: The root of the user's private data tree.
+     * - /users/{userId}/ledgers/{ledgerId}: User-owned financial accounts.
+     * - /users/{userId}/categories/{categoryId}: User-specific transaction classifications.
+     * - /users/{userId}/ledgers/{ledgerId}/transactions/{transactionId}: Transaction records nested by ledger.
+     * - /users/{userId}/audit_logs/{auditLogId}: Immutable logs of user/system actions.
+     * - /system_categories/{categoryId}: Read-only global categories shared by all users.
+     *
+     * Key Security Decisions:
+     * 1. Authorization Independence: Every user-owned document contains a `userId` field. Rules
+     *    validate this field against the URL parameter AND the `request.auth.uid`. This allows
+     *    for high-performance rules that do not require recursive 'get()' calls.
+     * 2. Structural Segregation: System categories are separated into a top-level collection 
+     *    to isolate public-read logic from private-user logic.
+     * 3. Immutability for Relational Integrity: Critical fields like `userId` and `ledgerId`
+     *    are enforced as immutable during updates to prevent users from "moving" data 
+     *    between accounts or owners.
+     * 4. Prototyping Flexibility: While authorization is strict, the schema (data types and 
+     *    non-relational fields) is not enforced to allow for rapid UI/UX iteration.
+     */
+
+    // --- Helper Functions ---
+
+    /**
+     * @description Basic check to see if the user is authenticated.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
+    /**
+     * @description Validates if the authenticated user's UID matches the provided userId.
+     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    /**
+     * @description Combines ownership check with document existence for state-changing operations.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description User Profile management. Users can only access and manage their own profile.
+     * @path /users/{userId}
+     * @allow (create) User 'abc' creates document '/users/abc' with {id: 'abc'}.
+     * @deny (create) User 'abc' attempts to create '/users/xyz'.
+     * @principle Ownership-based root access with path-data consistency.
+     */
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isSignedIn(); // Allow self-registration
-      allow update, delete: if isOwner(userId) || isAdmin();
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
 
+      /**
+       * @description User Ledgers. Owners manage their own financial accounts.
+       * @path /users/{userId}/ledgers/{ledgerId}
+       * @allow (list) User 'abc' queries '/users/abc/ledgers'.
+       * @deny (update) User 'abc' attempts to change 'userId' field from 'abc' to 'xyz'.
+       * @principle Denormalized ownership and immutable relational links.
+       */
       match /ledgers/{ledgerId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
 
+        /**
+         * @description Transactions nested under a specific ledger.
+         * @path /users/{userId}/ledgers/{ledgerId}/transactions/{transactionId}
+         * @allow (create) User 'abc' creates transaction in ledger 'L1' with {userId: 'abc', ledgerId: 'L1'}.
+         * @deny (create) User 'abc' attempts to create transaction in 'L1' but sets 'ledgerId' to 'L2'.
+         * @principle Multi-level relational integrity validation without get() calls.
+         */
         match /transactions/{transactionId} {
-          allow read, write: if isOwner(userId) || isAdmin();
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId && request.resource.data.ledgerId == ledgerId;
+          allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId && request.resource.data.ledgerId == resource.data.ledgerId;
+          allow delete: if isExistingOwner(userId);
         }
       }
+
+      /**
+       * @description User-defined Categories.
+       * @path /users/{userId}/categories/{categoryId}
+       * @allow (get) User 'abc' reads their custom 'Coffee' category.
+       * @deny (list) User 'xyz' attempts to list categories for user 'abc'.
+       * @principle Private user-scoped classification.
+       */
+      match /categories/{categoryId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Audit Logs. Read-only for users, immutable once created.
+       * @path /users/{userId}/audit_logs/{auditLogId}
+       * @allow (create) User 'abc' records a 'LOGIN' action log.
+       * @deny (update) User 'abc' attempts to modify details of an existing audit log.
+       * @principle User-specific audit trails with strictly prohibited modifications.
+       */
+      match /audit_logs/{auditLogId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update, delete: if false;
+      }
+    }
+
+    /**
+     * @description System-defined categories available to all registered users.
+     * @path /system_categories/{categoryId}
+     * @allow (list) Any signed-in user lists default categories.
+     * @deny (create) Any user attempts to add a new system category via the client.
+     * @principle Global read access for authenticated users with write protection.
+     */
+    match /system_categories/{categoryId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
     }
   }
 }
