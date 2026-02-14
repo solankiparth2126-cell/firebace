@@ -6,14 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Wallet, ReceiptText, TrendingUp, PiggyBank } from "lucide-react"
+import { ArrowLeft, Wallet, ReceiptText, TrendingUp, PiggyBank, CreditCard, Banknote } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
 const iconMap: Record<string, any> = {
   Wallet,
   PiggyBank,
-  TrendingUp
+  TrendingUp,
+  CreditCard,
+  Banknote
 }
 
 export default function LedgerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -50,8 +52,12 @@ export default function LedgerDetailsPage({ params }: { params: Promise<{ id: st
             <CardTitle className="text-sm font-medium text-muted-foreground">Current Balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">₹{ledger.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-            <p className="text-xs text-secondary mt-1 font-medium">Standard Account</p>
+            <div className={`text-3xl font-bold ${ledger.balance < 0 ? 'text-destructive' : ''}`}>
+              ₹{ledger.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </div>
+            <p className="text-xs text-secondary mt-1 font-medium">
+              {ledger.balance < 0 ? 'Outstanding Dues' : 'Available Balance'}
+            </p>
           </CardContent>
         </Card>
 

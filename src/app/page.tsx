@@ -1,12 +1,13 @@
 import { SummaryCards } from "@/components/dashboard/summary-cards"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data"
+import { MOCK_TRANSACTIONS, MOCK_LEDGERS } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { ReceiptText, TrendingUp, NotebookTabs } from "lucide-react"
 
 export default function Dashboard() {
   const recentTransactions = MOCK_TRANSACTIONS.slice(0, 5)
+  const topLedgers = MOCK_LEDGERS.slice(0, 4)
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -57,26 +58,22 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               < NotebookTabs className="h-5 w-5 text-secondary" />
-              Active Ledgers
+              Primary Accounts
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {[
-                { name: "Checking", balance: 4500.50, trend: "+12%" },
-                { name: "Savings", balance: 12000.00, trend: "+2.5%" },
-                { name: "Investments", balance: 8500.25, trend: "-4%" },
-              ].map((ledger) => (
-                <div key={ledger.name} className="flex items-center justify-between">
+              {topLedgers.map((ledger) => (
+                <div key={ledger.id} className="flex items-center justify-between">
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">{ledger.name}</p>
-                    <p className="text-xs text-muted-foreground">Main ledger account</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{ledger.description}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">₹{ledger.balance.toLocaleString('en-IN')}</p>
-                    <p className={`text-xs ${ledger.trend.startsWith('+') ? 'text-secondary' : 'text-destructive'}`}>
-                      {ledger.trend}
+                    <p className={`text-sm font-bold ${ledger.balance < 0 ? 'text-destructive' : ''}`}>
+                      ₹{ledger.balance.toLocaleString('en-IN')}
                     </p>
+                    <p className="text-[10px] text-muted-foreground uppercase">Active</p>
                   </div>
                 </div>
               ))}
@@ -84,8 +81,8 @@ export default function Dashboard() {
             <div className="mt-8 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-4">
               <TrendingUp className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-sm font-semibold">Spending is down!</p>
-                <p className="text-xs text-muted-foreground">You spent 15% less on entertainment this week.</p>
+                <p className="text-sm font-semibold">Spending is optimized!</p>
+                <p className="text-xs text-muted-foreground">Your savings rate is looking healthy this month.</p>
               </div>
             </div>
           </CardContent>
