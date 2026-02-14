@@ -44,7 +44,7 @@ export default function Dashboard() {
                       <Badge variant="outline">{tx.category}</Badge>
                     </TableCell>
                     <TableCell className={`text-right font-bold ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
-                      {tx.type === 'income' ? '+' : ''}{tx.amount.toFixed(2)}
+                      {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -56,7 +56,7 @@ export default function Dashboard() {
         <Card className="lg:col-span-3 glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <NotebookTabs className="h-5 w-5 text-secondary" />
+              < NotebookTabs className="h-5 w-5 text-secondary" />
               Active Ledgers
             </CardTitle>
           </CardHeader>
@@ -73,7 +73,7 @@ export default function Dashboard() {
                     <p className="text-xs text-muted-foreground">Main ledger account</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">${ledger.balance.toLocaleString()}</p>
+                    <p className="text-sm font-bold">₹{ledger.balance.toLocaleString('en-IN')}</p>
                     <p className={`text-xs ${ledger.trend.startsWith('+') ? 'text-secondary' : 'text-destructive'}`}>
                       {ledger.trend}
                     </p>

@@ -53,10 +53,12 @@ Based on the transactions and current balance, perform the following:
 3.  **Anomalies Detected**: Point out any unusual, unexpectedly high, or seemingly anomalous expenses. Explain why they might be considered anomalous.
 4.  **Saving Recommendations**: Provide 3-5 personalized and actionable suggestions for saving money, based on general financial principles and the user's spending patterns.
 
+All currency values provided are in Indian Rupees (INR/₹).
+
 Here is the financial data:
 
 Reporting Period: {{{reportingPeriod}}}
-Current Balance: $ {{{currentBalance}}}
+Current Balance: ₹ {{{currentBalance}}}
 
 Transactions:
 {{#each transactions}}

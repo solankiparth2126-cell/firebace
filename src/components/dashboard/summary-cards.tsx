@@ -5,21 +5,21 @@ export function SummaryCards() {
   const stats = [
     {
       title: "Total Balance",
-      value: "$25,000.75",
+      value: "₹2,50,000.75",
       description: "+2.5% from last month",
       icon: Wallet,
       color: "text-primary"
     },
     {
       title: "Monthly Income",
-      value: "$5,450.00",
+      value: "₹54,500.00",
       description: "2 sources active",
       icon: ArrowUpCircle,
       color: "text-secondary"
     },
     {
       title: "Monthly Expenses",
-      value: "$1,832.34",
+      value: "₹18,322.34",
       description: "45% of income",
       icon: ArrowDownCircle,
       color: "text-destructive"

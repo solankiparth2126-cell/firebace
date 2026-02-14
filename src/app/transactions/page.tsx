@@ -56,7 +56,7 @@ export default function TransactionsPage() {
                   <Input id="desc" className="col-span-3" placeholder="Groceries, Rent, etc." />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="amount" className="text-right">Amount</Label>
+                  <Label htmlFor="amount" className="text-right">Amount (₹)</Label>
                   <Input id="amount" type="number" className="col-span-3" placeholder="0.00" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -131,7 +131,7 @@ export default function TransactionsPage() {
                     <Badge variant="secondary" className="font-normal">{tx.category}</Badge>
                   </TableCell>
                   <TableCell className={`text-right font-bold ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
-                    {tx.type === 'income' ? '+' : ''}{tx.amount.toFixed(2)}
+                    {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </TableCell>
                   <TableCell className="text-center">
                     <Button variant="ghost" size="sm">Edit</Button>

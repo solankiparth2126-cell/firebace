@@ -48,7 +48,7 @@ export default function LedgersPage() {
                 <p className="text-sm text-muted-foreground">{ledger.description}</p>
               </CardHeader>
               <CardContent className="pt-4">
-                <div className="text-3xl font-bold mb-1">${ledger.balance.toLocaleString()}</div>
+                <div className="text-3xl font-bold mb-1">₹{ledger.balance.toLocaleString('en-IN')}</div>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider">Active Account</Badge>
               </CardContent>
               <CardFooter className="pt-0 border-t bg-muted/50 mt-4 px-6 py-4">
