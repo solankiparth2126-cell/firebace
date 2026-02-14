@@ -1,4 +1,3 @@
-
 import { SummaryCards } from "@/components/dashboard/summary-cards"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -13,8 +12,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back, User</h1>
-        <p className="text-muted-foreground">Here's your financial overview for March 2024.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Overview</h1>
+        <p className="text-muted-foreground">Welcome back. Here is your status for March 2024 in ₹.</p>
       </div>
 
       <SummaryCards />
@@ -24,7 +23,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ReceiptText className="h-5 w-5 text-primary" />
-              Recent Transactions
+              Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -46,7 +45,7 @@ export default function Dashboard() {
                       <Badge variant="outline" className="text-[10px]">{tx.category}</Badge>
                     </TableCell>
                     <TableCell className={`text-right font-bold text-xs ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
-                      {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -82,8 +81,8 @@ export default function Dashboard() {
             <div className="mt-8 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-4">
               <TrendingUp className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-sm font-semibold">Spending is optimized!</p>
-                <p className="text-xs text-muted-foreground">Your savings rate is looking healthy this month.</p>
+                <p className="text-sm font-semibold">Healthy Cashflow</p>
+                <p className="text-xs text-muted-foreground">Your savings rate is looking optimized.</p>
               </div>
             </div>
           </CardContent>
