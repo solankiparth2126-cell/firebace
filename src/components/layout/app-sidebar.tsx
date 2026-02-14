@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, ReceiptText, NotebookTabs, LogOut, Settings, Wallet } from "lucide-react"
+import { LayoutDashboard, ReceiptText, NotebookTabs, LogOut, Settings, Wallet, FileUp } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -20,6 +20,7 @@ const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/" },
   { title: "Transactions", icon: ReceiptText, url: "/transactions" },
   { title: "Ledgers", icon: NotebookTabs, url: "/ledgers" },
+  { title: "Import Statement", icon: FileUp, url: "/import" },
 ]
 
 export function AppSidebar() {
