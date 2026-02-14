@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { MOCK_LEDGERS } from "@/lib/mock-data"
 import { Wallet, PiggyBank, TrendingUp, Plus, MoreVertical, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 const iconMap: Record<string, any> = {
   Wallet,
@@ -52,8 +53,10 @@ export default function LedgersPage() {
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider">Active Account</Badge>
               </CardContent>
               <CardFooter className="pt-0 border-t bg-muted/50 mt-4 px-6 py-4">
-                <Button variant="link" className="p-0 h-auto text-primary gap-1 group-hover:translate-x-1 transition-transform">
-                  View Transactions <ArrowRight className="h-3 w-3" />
+                <Button variant="link" asChild className="p-0 h-auto text-primary gap-1 group-hover:translate-x-1 transition-transform cursor-pointer">
+                  <Link href={`/ledgers/${ledger.id}`}>
+                    View Transactions <ArrowRight className="h-3 w-3" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
