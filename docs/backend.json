@@ -1,0 +1,268 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores non-authentication information and preferences for a user of the MoneyFlow application. Authentication is handled by an external system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity. This typically corresponds to the user's ID from the external authentication system (e.g., Firebase Auth UID)."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, often provided by the authentication system.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name."
+        },
+        "preferredCurrency": {
+          "type": "string",
+          "description": "The ISO 4217 currency code (e.g., 'USD', 'EUR') preferred by the user for displaying financial data."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "displayName",
+        "preferredCurrency",
+        "createdAt"
+      ]
+    },
+    "Ledger": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Ledger",
+      "type": "object",
+      "description": "Represents a financial account or grouping within which transactions are recorded (e.g., 'Savings Account', 'Credit Card', 'Cash Wallet').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Ledger entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile that owns this ledger. (Relationship: UserProfile 1:N Ledger)"
+        },
+        "name": {
+          "type": "string",
+          "description": "A user-defined name for the ledger (e.g., 'Main Checking', 'Travel Fund')."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional detailed description for the ledger."
+        },
+        "initialBalance": {
+          "type": "number",
+          "description": "The starting balance of the ledger when it was created."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The ISO 4217 currency code for transactions within this specific ledger."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates whether the ledger is currently active and available for transactions."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the ledger was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the ledger was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "initialBalance",
+        "currency",
+        "isActive",
+        "createdAt"
+      ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a single financial entry, either an income or an expense, associated with a specific ledger.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Transaction entity."
+        },
+        "ledgerId": {
+          "type": "string",
+          "description": "Reference to the Ledger to which this transaction belongs. (Relationship: Ledger 1:N Transaction)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile that owns this transaction. (Relationship: UserProfile 1:N Transaction, denormalized for easier querying)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of financial movement (e.g., 'income', 'expense', 'transfer')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary value of the transaction. Positive for income, negative for expense."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The ISO 4217 currency code for this specific transaction."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the transaction occurred.",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description or title for the transaction (e.g., 'Grocery Shopping', 'Monthly Salary')."
+        },
+        "category": {
+          "type": "string",
+          "description": "A user-defined category for the transaction (e.g., 'Food', 'Utilities', 'Transportation')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional additional notes or details about the transaction."
+        },
+        "attachmentUrl": {
+          "type": "string",
+          "description": "An optional URL pointing to an uploaded attachment related to the transaction (e.g., a receipt image).",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the transaction was recorded.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the transaction was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "ledgerId",
+        "userId",
+        "type",
+        "amount",
+        "currency",
+        "date",
+        "description",
+        "category",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores individual user profiles. Each document ID (userId) must correspond to the Firebase Authentication UID. Access is strictly restricted to the owning user (request.auth.uid == userId).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user, matching their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/ledgers/{ledgerId}",
+        "definition": {
+          "entityName": "Ledger",
+          "schema": {
+            "$ref": "#/backend/entities/Ledger"
+          },
+          "description": "Stores financial ledgers, each belonging to a specific user. The 'userId' in the path must match the Firebase Auth UID, and the 'userId' field within the document is denormalized to ensure authorization independence. Access is restricted to the owning user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this ledger."
+            },
+            {
+              "name": "ledgerId",
+              "description": "The unique identifier for a specific ledger."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/ledgers/{ledgerId}/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores individual financial transactions associated with a specific ledger and user. Both 'userId' and 'ledgerId' are present in the path and denormalized within the document to ensure robust and independent authorization checks. Access is restricted to the owning user of the parent ledger.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this transaction."
+            },
+            {
+              "name": "ledgerId",
+              "description": "The unique identifier of the ledger to which this transaction belongs."
+            },
+            {
+              "name": "transactionId",
+              "description": "The unique identifier for a specific transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/audit_logs/{auditLogId}",
+        "definition": {
+          "entityName": "AuditLog",
+          "schema": {
+            "$ref": "#/backend/entities/AuditLog"
+          },
+          "description": "A collection for storing audit logs related to user actions within the application. Each log entry is strictly associated with a 'userId' (both in the path and denormalized in the document). This is primarily for system logging and user self-review.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user whose actions are being logged."
+            },
+            {
+              "name": "auditLogId",
+              "description": "The unique identifier for an individual audit log entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure design is built upon the core principles of Authorization Independence and Query-Aware Security Rules (QAPs) to ensure security, scalability, and debuggability for the MoneyFlow application.Authorization Independence via Denormalization: To eliminate hierarchical authorization dependencies (avoiding get() calls in security rules) and enable atomic operations, key authorization context is denormalized directly into relevant documents: Ledgers (/users/{userId}/ledgers/{ledgerId}): Each Ledger document explicitly includes the userId field (e.g., resource.data.userId). This allows security rules to directly verify ownership by comparing request.auth.uid with resource.data.userId without needing to fetch the parent UserProfile document. This design also supports atomic creation of a user's profile and their initial ledgers. Transactions (/users/{userId}/ledgers/{ledgerId}/transactions/{transactionId}): Each Transaction document explicitly includes both the userId and ledgerId fields. Security rules can then directly verify request.auth.uid == resource.data.userId and ledgerId == resource.data.ledgerId (where ledgerId is the wildcard from the path). This ensures that access to transactions is fully self-contained and independent of parent document lookups. Audit Logs (/users/{userId}/audit_logs/{auditLogId}): Similarly, each AuditLog document will include the userId, enabling direct ownership checks.Query-Aware Security Rules (QAPs) through Structural Segregation: This structure ensures that security rules are not used as data filters, promoting efficient and secure list operations: Path-Based Ownership: All user-specific data is strictly organized under a top-level /users/{userId} collection. This includes UserProfile documents, Ledgers, Transactions, and AuditLogs. This creates a strong, explicit ownership hierarchy. Homogeneous Security Posture: By segregating data based on ownership, all documents within a given collection (e.g., /users/{userId}/ledgers) inherently share the same security requirements – they are owned by the userId in the path. There is no mixing of public/private or varying access levels within a single collection. Efficient List Operations: Security rules will consistently enforce that the userId wildcard in any path must match request.auth.uid. This means that when a user attempts to list documents from any of their subcollections (e.g., /users/{request.auth.uid}/ledgers), the rules inherently guarantee that only documents belonging to that authenticated user will be returned. The structure itself prevents unauthorized data from being returned, making the list operation secure and performant without complex filtering logic in the rules."
+  }
+}

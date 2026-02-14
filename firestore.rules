@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * MoneyFlow Security Rules
+     * 
+     * CORE PHILOSOPHY:
+     * This ruleset enforces a strict user-ownership model. Every piece of data is partitioned 
+     * by the user's unique identity (UID) from Firebase Authentication. This ensures that 
+     * users can only access, create, or modify their own financial data.
+     * 
+     * DATA STRUCTURE:
+     * The database follows a hierarchical, user-centric organization:
+     * - /users/{userId} (Profile)
+     * - /users/{userId}/ledgers/{ledgerId} (Accounts/Groups)
+     * - /users/{userId}/ledgers/{ledgerId}/transactions/{transactionId} (Financial Entries)
+     * - /users/{userId}/audit_logs/{auditLogId} (Activity Tracking)
+     * 
+     * KEY SECURITY DECISIONS:
+     * 1. Authorization Independence: We utilize denormalized fields (like userId) on documents 
+     *    to perform fast, stateless security checks without expensive get() calls to parent documents.
+     * 2. Path-Based Security: The wildcard {userId} in the path is strictly compared against 
+     *    the authenticated user's UID (request.auth.uid).
+     * 3. Prototyping Flexibility: While authorization is strictly enforced, the specific 
+     *    shape and types of data fields (except for relational IDs) are not validated to 
+     *    allow for rapid schema iteration.
+     * 4. Relational Integrity: On creation, we ensure that internal ID fields match the 
+     *    resource path. On update, we prevent these relational fields from being changed.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /** Checks if the user is authenticated. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the provided userId matches the authenticated user. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Checks if a document exists and belongs to the authenticated user. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /** Validates that a field is not being modified during an update. */
+    function isUnchanged(fieldName) {
+      return request.resource.data[fieldName] == resource.data[fieldName];
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the top-level User Profile document.
+     * @path /users/{userId}
+     * @allow (create) if auth.uid matches userId and data.id matches userId.
+     * @deny (get) if auth.uid does not match the userId in the path.
+     * @principle Ownership and Self-Creation.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('id');
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for Ledgers (Accounts) owned by a specific user.
+       * @path /users/{userId}/ledgers/{ledgerId}
+       * @allow (list) if request.auth.uid == userId.
+       * @deny (update) if attempting to change the userId field.
+       * @principle Denormalized ownership for performant authorization.
+       */
+      match /ledgers/{ledgerId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for Transactions within a ledger.
+         * @path /users/{userId}/ledgers/{ledgerId}/transactions/{transactionId}
+         * @allow (create) if userId and ledgerId in data match the path.
+         * @deny (create) if the ledgerId in the data does not match the ledgerId in the path.
+         * @principle Path-to-Data relational integrity.
+         */
+        match /transactions/{transactionId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId && request.resource.data.ledgerId == ledgerId;
+          allow update: if isExistingOwner(userId) && isUnchanged('userId') && isUnchanged('ledgerId');
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+
+      /**
+       * @description Rules for Audit Logs related to user actions.
+       * @path /users/{userId}/audit_logs/{auditLogId}
+       * @allow (create) if the authenticated user is the owner.
+       * @deny (update) Audit logs are typically immutable.
+       * @principle Restricted access to sensitive activity logs.
+       */
+      match /audit_logs/{auditLogId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if false; // Audit logs should generally not be modified.
+        allow delete: if isExistingOwner(userId); // Allowing delete for prototyping flexibility.
+      }
+    }
+  }
+}
