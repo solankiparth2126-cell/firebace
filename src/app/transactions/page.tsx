@@ -78,9 +78,17 @@ export default function TransactionsPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="salary">Salary & Income</SelectItem>
                       <SelectItem value="food">Food & Dining</SelectItem>
-                      <SelectItem value="rent">Rent & Bills</SelectItem>
-                      <SelectItem value="salary">Salary</SelectItem>
+                      <SelectItem value="shopping">Shopping</SelectItem>
+                      <SelectItem value="transport">Transportation</SelectItem>
+                      <SelectItem value="rent">Rent & Housing</SelectItem>
+                      <SelectItem value="utilities">Utilities & Bills</SelectItem>
+                      <SelectItem value="health">Healthcare</SelectItem>
+                      <SelectItem value="entertainment">Entertainment</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="travel">Travel</SelectItem>
+                      <SelectItem value="investment">Investments</SelectItem>
                       <SelectItem value="misc">Miscellaneous</SelectItem>
                     </SelectContent>
                   </Select>
