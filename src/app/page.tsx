@@ -57,7 +57,7 @@ export default function Dashboard() {
         <Card className="lg:col-span-3 glass-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              < NotebookTabs className="h-5 w-5 text-secondary" />
+              <NotebookTabs className="h-5 w-5 text-secondary" />
               Primary Accounts
             </CardTitle>
           </CardHeader>
