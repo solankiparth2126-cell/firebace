@@ -1,19 +1,74 @@
+
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { MOCK_LEDGERS } from "@/lib/mock-data"
-import { Wallet, PiggyBank, TrendingUp, Plus, MoreVertical, ArrowRight } from "lucide-react"
+import { Wallet, PiggyBank, TrendingUp, Plus, MoreVertical, ArrowRight, CreditCard, Banknote } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToast } from "@/hooks/use-toast"
 
 const iconMap: Record<string, any> = {
   Wallet,
   PiggyBank,
-  TrendingUp
+  TrendingUp,
+  CreditCard,
+  Banknote
 }
 
 export default function LedgersPage() {
+  const [ledgers, setLedgers] = useState(MOCK_LEDGERS)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { toast } = useToast()
+
+  // Form state
+  const [newName, setNewName] = useState("")
+  const [newDesc, setNewDesc] = useState("")
+  const [newBalance, setNewBalance] = useState("")
+  const [newIcon, setNewIcon] = useState("Wallet")
+
+  const handleCreateLedger = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!newName || !newBalance) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all required fields.",
+      })
+      return
+    }
+
+    const newLedger = {
+      id: (ledgers.length + 1).toString(),
+      name: newName,
+      description: newDesc,
+      balance: parseFloat(newBalance),
+      icon: newIcon
+    }
+
+    setLedgers([...ledgers, newLedger])
+    setIsDialogOpen(false)
+    
+    // Reset form
+    setNewName("")
+    setNewDesc("")
+    setNewBalance("")
+    setNewIcon("Wallet")
+
+    toast({
+      title: "Success",
+      description: `${newName} ledger has been created.`,
+    })
+  }
+
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
       <div className="flex items-center justify-between">
@@ -21,14 +76,77 @@ export default function LedgersPage() {
           <h1 className="text-3xl font-bold tracking-tight">My Ledgers</h1>
           <p className="text-muted-foreground">Manage your different accounts and financial pots.</p>
         </div>
-        <Button className="gap-2 bg-secondary hover:bg-secondary/90 text-white">
-          <Plus className="h-4 w-4" />
-          Create New Ledger
-        </Button>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 bg-secondary hover:bg-secondary/90 text-white">
+              <Plus className="h-4 w-4" />
+              Create New Ledger
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <form onSubmit={handleCreateLedger}>
+              <DialogHeader>
+                <DialogTitle>Create New Ledger</DialogTitle>
+                <DialogDescription>
+                  Add a new account or fund to track your transactions.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Ledger Name</Label>
+                  <Input 
+                    id="name" 
+                    placeholder="e.g., House Fund, Vacation, Business" 
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="balance">Initial Balance (₹)</Label>
+                  <Input 
+                    id="balance" 
+                    type="number" 
+                    placeholder="0.00" 
+                    value={newBalance}
+                    onChange={(e) => setNewBalance(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="icon">Icon</Label>
+                  <Select value={newIcon} onValueChange={setNewIcon}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an icon" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Wallet">Wallet</SelectItem>
+                      <SelectItem value="PiggyBank">Savings / Piggy Bank</SelectItem>
+                      <SelectItem value="TrendingUp">Investments</SelectItem>
+                      <SelectItem value="CreditCard">Credit Card</SelectItem>
+                      <SelectItem value="Banknote">Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="desc">Description (Optional)</Label>
+                  <Textarea 
+                    id="desc" 
+                    placeholder="What is this ledger for?" 
+                    value={newDesc}
+                    onChange={(e) => setNewDesc(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full sm:w-auto">Create Ledger</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {MOCK_LEDGERS.map((ledger) => {
+        {ledgers.map((ledger) => {
           const IconComp = iconMap[ledger.icon] || Wallet
           return (
             <Card key={ledger.id} className="glass-card group overflow-hidden relative">
@@ -46,10 +164,10 @@ export default function LedgersPage() {
                   <IconComp className="h-6 w-6" />
                 </div>
                 <CardTitle>{ledger.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{ledger.description}</p>
+                <p className="text-sm text-muted-foreground line-clamp-1">{ledger.description}</p>
               </CardHeader>
               <CardContent className="pt-4">
-                <div className="text-3xl font-bold mb-1">₹{ledger.balance.toLocaleString('en-IN')}</div>
+                <div className="text-3xl font-bold mb-1">₹{ledger.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider">Active Account</Badge>
               </CardContent>
               <CardFooter className="pt-0 border-t bg-muted/50 mt-4 px-6 py-4">
