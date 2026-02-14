@@ -82,13 +82,13 @@ export default function LedgerDetailsPage({ params }: { params: Promise<{ id: st
                 {ledgerTransactions.map((tx) => (
                   <TableRow key={tx.id}>
                     <TableCell className="text-xs">{tx.date}</TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium text-xs">
                       {tx.description}
                       <div className="md:hidden">
                         <Badge variant="outline" className="text-[10px] scale-75 origin-left">{tx.category}</Badge>
                       </div>
                     </TableCell>
-                    <TableCell className={`text-right font-bold ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
+                    <TableCell className={`text-right font-bold text-xs ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
                       {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN')}
                     </TableCell>
                   </TableRow>

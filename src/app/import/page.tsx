@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -59,7 +60,7 @@ export default function ImportPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Statement Import</h1>
-        <p className="text-muted-foreground">Upload or paste your bank statement to automatically categorize entries.</p>
+        <p className="text-muted-foreground">Upload or paste your bank statement to automatically categorize entries in ₹.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-5">

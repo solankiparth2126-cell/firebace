@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Wallet, ShieldCheck, ArrowRight, Loader2 } from "lucide-react"
+import { Wallet, ShieldCheck, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 
@@ -19,8 +19,6 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
-    // Simulate API call
     setTimeout(() => {
       setLoading(false)
       setStep(2)
@@ -28,13 +26,12 @@ export default function LoginPage() {
         title: "Credentials verified",
         description: "Please enter the 6-digit code sent to your phone.",
       })
-    }, 1500)
+    }, 1200)
   }
 
   const handleVerify2FA = (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
     setTimeout(() => {
       setLoading(false)
       toast({
@@ -42,7 +39,7 @@ export default function LoginPage() {
         description: "Welcome back to MoneyFlow Pro.",
       })
       router.push("/")
-    }, 1500)
+    }, 1200)
   }
 
   return (
@@ -53,7 +50,7 @@ export default function LoginPage() {
             <Wallet className="h-10 w-10" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">MoneyFlow Pro</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">MoneyFlow Pro</h2>
             <p className="text-sm text-muted-foreground">Secure your financial future</p>
           </div>
         </div>
@@ -80,7 +77,7 @@ export default function LoginPage() {
           ) : (
             <form onSubmit={handleVerify2FA} className="space-y-4">
               <div className="text-center space-y-2 mb-6">
-                <CardTitle>Two-Step Verification</CardTitle>
+                <CardTitle className="text-lg">Two-Step Verification</CardTitle>
                 <CardDescription>Enter the verification code to continue</CardDescription>
               </div>
               <div className="flex justify-center gap-2">
@@ -103,7 +100,7 @@ export default function LoginPage() {
           )}
         </CardContent>
 
-        <CardFooter className="bg-muted/30 px-8 py-4 flex justify-between items-center text-xs text-muted-foreground border-t">
+        <CardFooter className="bg-muted/30 px-8 py-4 flex justify-between items-center text-[10px] text-muted-foreground border-t">
           <span>Protected by AES-256 Encryption</span>
           <div className="flex gap-2">
             <span className="hover:text-primary cursor-pointer">Help</span>

@@ -1,3 +1,4 @@
+
 import { SummaryCards } from "@/components/dashboard/summary-cards"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -39,12 +40,12 @@ export default function Dashboard() {
               <TableBody>
                 {recentTransactions.map((tx) => (
                   <TableRow key={tx.id}>
-                    <TableCell className="font-medium">{tx.date}</TableCell>
-                    <TableCell>{tx.description}</TableCell>
+                    <TableCell className="font-medium text-xs">{tx.date}</TableCell>
+                    <TableCell className="text-xs">{tx.description}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{tx.category}</Badge>
+                      <Badge variant="outline" className="text-[10px]">{tx.category}</Badge>
                     </TableCell>
-                    <TableCell className={`text-right font-bold ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
+                    <TableCell className={`text-right font-bold text-xs ${tx.type === 'income' ? 'text-secondary' : 'text-foreground'}`}>
                       {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                   </TableRow>
@@ -56,7 +57,7 @@ export default function Dashboard() {
 
         <Card className="lg:col-span-3 glass-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <NotebookTabs className="h-5 w-5 text-secondary" />
               Primary Accounts
             </CardTitle>

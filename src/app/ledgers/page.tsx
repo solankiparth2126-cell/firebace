@@ -32,7 +32,6 @@ export default function LedgersPage() {
   const [editingLedger, setEditingLedger] = useState<Ledger | null>(null)
   const { toast } = useToast()
 
-  // Form state for Create/Edit
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -52,7 +51,7 @@ export default function LedgersPage() {
     }
 
     const newLedger: Ledger = {
-      id: (ledgers.length + 1).toString(),
+      id: Math.random().toString(36).substr(2, 9),
       name: formData.name,
       description: formData.description,
       balance: parseFloat(formData.balance),
@@ -117,7 +116,7 @@ export default function LedgersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Ledgers</h1>
-          <p className="text-muted-foreground">Manage your bank accounts, cash, and credit cards.</p>
+          <p className="text-muted-foreground">Manage your bank accounts, cash, and credit cards in ₹.</p>
         </div>
         
         <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if (!open) resetForm(); }}>
@@ -220,11 +219,11 @@ export default function LedgersPage() {
                 }`}>
                   <IconComp className="h-6 w-6" />
                 </div>
-                <CardTitle className="pr-8">{ledger.name}</CardTitle>
+                <CardTitle className="pr-8 text-lg">{ledger.name}</CardTitle>
                 <p className="text-sm text-muted-foreground line-clamp-1">{ledger.description}</p>
               </CardHeader>
               <CardContent className="pt-4">
-                <div className={`text-3xl font-bold mb-1 ${isNegative ? 'text-destructive' : ''}`}>
+                <div className={`text-2xl font-bold mb-1 ${isNegative ? 'text-destructive' : ''}`}>
                   ₹{ledger.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </div>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
@@ -243,15 +242,11 @@ export default function LedgersPage() {
         })}
       </div>
 
-      {/* Edit Ledger Dialog */}
       <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if (!open) setEditingLedger(null); }}>
         <DialogContent>
           <form onSubmit={handleEditLedger}>
             <DialogHeader>
               <DialogTitle>Edit Ledger</DialogTitle>
-              <DialogDescription>
-                Update the name or details of your account.
-              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">

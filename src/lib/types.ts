@@ -1,3 +1,4 @@
+
 export type TransactionType = 'income' | 'expense';
 
 export interface Transaction {
@@ -16,11 +17,4 @@ export interface Ledger {
   description: string;
   balance: number;
   icon: string;
-}
-
-export interface FinancialSummary {
-  totalBalance: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  savingsRate: number;
 }
